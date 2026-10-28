@@ -1,0 +1,26 @@
+{
+  "appCommit": "933d5b04870185e085eb65520dd498af4db49f2d",
+  "coreCommit": "a579b1ad3ae738c943920dde924f22da5883f79f",
+  "wasmSha256": "8218e558d0cd593f76e345c7140709c675295912de9afb770e9eb072fd4cf0e7",
+  "builtAt": "2026-10-28",
+  "files": {
+    "index.html": "627de64b3447a7e54f8677379ec37f3f04d1dc240d2eed8ed0bc98fed81d06d2",
+    "app.js": "87f2c2612c6e042b5013e4a41b3972aa8d180f27133af12d54eb4a2b91349f28",
+    "subfrost_wallet_core_wasm_bg.wasm": "8218e558d0cd593f76e345c7140709c675295912de9afb770e9eb072fd4cf0e7"
+  },
+  "hostsNamedInBundle": [
+    "api.alkanode.com",
+    "api.bound.money",
+    "espo.subfrost.io",
+    "etherscan.io",
+    "feross.org",
+    "mainnet.subfrost.io",
+    "mempool.space",
+    "meta.lake.direct",
+    "regtest.subfrost.io",
+    "sepolia.etherscan.io",
+    "signet.bound.money",
+    "signet.subfrost.io",
+    "testnet.subfrost.io"
+  ]
+}

@@ -1,0 +1,4 @@
+# The prebuilt accelerator is checked byte for byte against local/build.json; never convert line endings.
+local/** -text
+docs/** -text
+accelerate.sh text eol=lf

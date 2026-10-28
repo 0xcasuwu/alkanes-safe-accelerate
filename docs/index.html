@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- site/src/setup.html → docs/index.html (GitHub Pages): how to run the accelerator on your own computer.
+     The one-line command below is what site/test/setup-smoke.mjs copies off the LIVE page and runs in a fresh
+     home folder, so the instructions are tested exactly as a reader would follow them. Keep the command in the
+     <pre id="cmd"> block, on one line. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Alkanes-safe Accelerate</title>
+<meta name="description" content="Speed up a stuck alkanes transaction without moving its alkanes, runes or inscriptions: how to run the accelerator on your computer with one command.">
+<style>
+  :root { --bg:#0b1220; --card:#111a2e; --raise:#16213a; --text:#e8edf7; --muted:rgba(232,237,247,.62); --faint:rgba(232,237,247,.38); --line:rgba(232,237,247,.08); --edge:rgba(255,255,255,.07); --ok:#4ade80; --danger:#f87171; --warn:#fbbf24; --accent:#7aa2ff; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  main { max-width:760px; margin:0 auto; padding:36px 16px 64px; }
+  h1 { font-size:28px; line-height:1.25; margin:0 0 10px; }
+  h2 { font-size:15px; margin:0 0 12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+  h3 { font-size:15px; margin:18px 0 6px; }
+  p { margin:0 0 10px; } ul, ol { margin:0 0 10px; padding-left:22px; } li { margin:4px 0; }
+  a { color:var(--accent); }
+  .lead { color:var(--muted); font-size:16px; margin-bottom:14px; }
+  .chip { display:inline-block; font-size:12px; letter-spacing:.04em; padding:3px 10px; border-radius:999px; background:#3a2a06; color:var(--warn); margin-bottom:14px; }
+  .card { background:var(--card); border-radius:16px; padding:20px; margin:16px 0; box-shadow:inset 0 1px 0 var(--edge),0 8px 24px rgba(0,0,0,.25); }
+  .muted { color:var(--muted); } .small { font-size:13px; } .ok { color:var(--ok); } .warn { color:var(--warn); } .danger { color:var(--danger); }
+  code { font:13px ui-monospace,SFMono-Regular,Menlo,monospace; background:var(--raise); padding:1px 5px; border-radius:6px; white-space:nowrap; }
+  .cmd { position:relative; background:#060b16; border-radius:12px; padding:14px 14px 14px 14px; margin:10px 0 6px; }
+  .cmd pre { margin:0; font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; white-space:pre-wrap; word-break:break-all; color:#cfe0ff; padding-right:70px; }
+  .cmd button { position:absolute; top:10px; right:10px; font:inherit; font-size:13px; border:0; border-radius:8px; padding:5px 10px; cursor:pointer; background:var(--accent); color:#0b1220; font-weight:700; }
+  .steps { counter-reset:s; list-style:none; padding:0; }
+  .steps > li { counter-increment:s; position:relative; padding-left:34px; margin:10px 0; }
+  .steps > li::before { content:counter(s); position:absolute; left:0; top:1px; width:22px; height:22px; border-radius:50%; background:var(--raise); color:var(--accent); font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+  table { width:100%; border-collapse:collapse; font-size:14px; margin:6px 0 4px; }
+  th { text-align:left; font-weight:400; color:var(--faint); padding:6px 6px 6px 0; font-size:12px; text-transform:uppercase; letter-spacing:.05em; }
+  td { padding:8px 6px 8px 0; border-top:1px solid var(--line); vertical-align:top; }
+  td:first-child { white-space:nowrap; font-weight:600; padding-right:12px; }
+  dl { margin:0; } dt { font-weight:600; margin-top:12px; } dd { margin:4px 0 0; color:var(--muted); }
+  footer { color:var(--faint); font-size:12px; margin-top:28px; }
+  @media (max-width:560px) { td:first-child { white-space:normal; } h1 { font-size:24px; } }
+</style>
+</head>
+<body>
+<main>
+  <span class="chip">Proof of concept · runs on your computer</span>
+  <h1>Speed up a stuck alkanes transaction, safely</h1>
+  <p class="lead">A wallet's own "Speed up" rebuilds your transaction, and that can send alkanes, runes or inscriptions to the wrong place or burn them. This accelerator only raises the fee. Every input, output and data field stays exactly as it was, and it checks that before anything is signed.</p>
+
+  <section class="card">
+    <h2>1 · Before you start</h2>
+    <ul>
+      <li>A Mac or Linux computer (on Windows, use WSL).</li>
+      <li><b>Node.js 18 or newer.</b> Check with <code>node -v</code> in Terminal. If it's missing, install it from <a href="https://nodejs.org" rel="noreferrer">nodejs.org</a>, or with Homebrew: <code>brew install node</code>.</li>
+      <li><b>git</b>, which most Macs already have (if not, Terminal will offer to install it).</li>
+      <li>No GitHub account: the code is public at <a href="https://github.com/0xcasuwu/alkanes-safe-accelerate" rel="noreferrer">github.com/0xcasuwu/alkanes-safe-accelerate</a>.</li>
+      <li>A <b>small test wallet</b> and its recovery phrase, and the stuck transaction's id.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>2 · Start it: one command</h2>
+    <p>Open Terminal, paste this, and press Return:</p>
+    <div class="cmd"><pre id="cmd">[ -d ~/alkanes-safe-accelerate ] || git clone https://github.com/0xcasuwu/alkanes-safe-accelerate.git ~/alkanes-safe-accelerate && bash ~/alkanes-safe-accelerate/accelerate.sh</pre><button type="button" data-copy="cmd">Copy</button></div>
+    <p class="small muted">The same command works every time, first run or fiftieth.</p>
+    <h3>What it does</h3>
+    <ol class="steps">
+      <li><b>Downloads the accelerator</b> to a folder in your home folder, <code>alkanes-safe-accelerate</code>, the first time only. Later runs reuse that folder and pick up any updates.</li>
+      <li><b>Checks every file</b> of the app against the fingerprints recorded when it was built, and refuses to start if anything differs.</li>
+      <li><b>Starts a small server on your computer only</b> (nothing on your network can reach it). It passes the page's blockchain lookups to SUBFROST, the way the SUBFROST app's own server does.</li>
+      <li><b>Opens</b> <code>http://localhost:4173</code> in your browser. If that port is busy it picks the next free one, and Terminal shows the address.</li>
+    </ol>
+    <p>Keep the Terminal window open while you use it. To stop, press <b>Ctrl+C</b> in that window, or close it.</p>
+    <p class="small muted">Want to read the script before running it? <a href="accelerate.sh">accelerate.sh</a> is short and commented. Nothing is installed: it needs only git and Node, and you remove it by deleting the <code>alkanes-safe-accelerate</code> folder.</p>
+  </section>
+
+  <section class="card">
+    <h2>3 · Use it</h2>
+    <ol class="steps">
+      <li><b>Unlock.</b> Paste the test wallet's recovery phrase. It stays in that browser tab's memory: it isn't saved anywhere or sent anywhere, not even to the server in your Terminal, and it's gone when you close or reload the tab.</li>
+      <li><b>Check the address</b> the page shows is your wallet's. (It uses the standard paths: taproot <code>bc1p…</code> and native segwit <code>bc1q…</code>.)</li>
+      <li><b>Paste the stuck transaction's id</b> and press <b>Check</b>. The page reads the transaction and says whether it can be sped up safely, or exactly why not.</li>
+      <li><b>Pick a fee rate.</b> The plan shows the new fee and the one thing that changes: your own BTC change, lowered to pay it.</li>
+      <li><b>Press "Check: sign and verify, don't broadcast"</b> first. It signs and runs every check, including asking a Bitcoin node whether it would accept the result, then stops. If that passes, <b>"Accelerate: sign and broadcast"</b> sends it.</li>
+    </ol>
+    <p class="warn small">Never use your wallet's own "Speed up" on an alkanes transaction, before or after using this.</p>
+  </section>
+
+  <section class="card">
+    <h2>What it protects, and what it can't</h2>
+    <table>
+      <tr><th>Asset</th><th>Protection</th></tr>
+      <tr><td class="ok">Alkanes</td><td>The replacement is the original byte for byte except one amount: your change. Alkanes are routed by position, not amount. Before signing, the page also asks SUBFROST's indexer to settle the original and the replacement side by side, and refuses if any output's alkanes differ.</td></tr>
+      <tr><td class="ok">Runes</td><td>Every output and the data field are unchanged, and runes are also routed by position.</td></tr>
+      <tr><td class="ok">Inscriptions</td><td>No inscribed sat may change outputs or be spent as fee. If the inscription index can't be read, it refuses.</td></tr>
+      <tr><td class="ok">Your BTC</td><td>Only your own change goes down, never below 546 sats, within fee caps, checked again on the signed transaction.</td></tr>
+      <tr><td class="warn">Rare sats, Atomicals</td><td>Not protected: nothing SUBFROST runs indexes them. The plan lists which sats move into the fee. Move valuable ones out first.</td></tr>
+      <tr><td class="warn">Contracts tied to the transaction id</td><td>Partly: unknown data and payments to script addresses are refused unless you confirm it's a plain payment, and SUBFROST peg-outs are refused. A wrong confirmation can't be caught.</td></tr>
+    </table>
+    <p class="small muted">Whenever data can't be read or something changes between steps, it stops instead of guessing. It can't detect a data source that is confidently wrong. The safety checks are tested one by one (each removed alone turns a test red), on devnet, and on mainnet: the replacement of a real alkanes transaction waiting in the mempool settled its alkanes identically and passed the acceptance test of two independent Bitcoin nodes. This is a proof of concept and the code has not had an outside review.</p>
+  </section>
+
+  <section class="card">
+    <h2>Not in this version</h2>
+    <ul class="small">
+      <li><b>Adding a separate coin to pay the fee.</b> The fee comes out of the transaction's own BTC change, so a transaction whose change is too small is refused. The SUBFROST app version can add a coin.</li>
+      <li>The app's records of in-flight packages and peg-outs.</li>
+      <li>Browser wallet extensions (Xverse, Unisat, …): recovery phrase only, for now.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>If something goes wrong</h2>
+    <dl class="small">
+      <dt>"Node.js is not installed" or "too old"</dt><dd>Install version 18 or newer from nodejs.org, then run the command again.</dd>
+      <dt>"Download failed", or git says "Repository not found"</dt><dd>Check your internet connection. If it persists, the command changed while copying: copy it again with the Copy button.</dd>
+      <dt>"No such file or directory" naming <code>accelerate.sh</code>, or "already exists and is not a copy"</dt><dd>A different folder named <code>alkanes-safe-accelerate</code> is in your home folder. Rename it and run the command again.</dd>
+      <dt>"does not match the build"</dt><dd>A file in the download was changed or damaged. Delete the <code>alkanes-safe-accelerate</code> folder and run the command again.</dd>
+      <dt>The browser didn't open</dt><dd>Open the address shown in Terminal, usually <code>http://localhost:4173</code>.</dd>
+      <dt>The address shown isn't my wallet's</dt><dd>Try another account index. Wallets using other address types (for example <code>3…</code> nested segwit) aren't supported yet.</dd>
+      <dt>Refused: not this wallet's transaction</dt><dd>The transaction must be one the unlocked wallet signed.</dd>
+      <dt>Refused: change too small, or no change</dt><dd>There's no BTC change big enough to pay the extra fee. See "Not in this version" above.</dd>
+    </dl>
+  </section>
+
+  <section class="card">
+    <h2>Other tools</h2>
+    <p class="small"><a href="check/">Read-only checker</a>: paste a transaction id and see whether it can be sped up safely and what would change, with no wallet and nothing to install. It can't sign or broadcast.</p>
+  </section>
+
+  <footer>Accelerator build: subfrost-app <code>933d5b048701</code> · engine <code>a579b1ad3ae7</code> · wasm sha256 <code>8218e558d0cd593f</code> · 2026-10-28. A hosted version on SUBFROST's own servers comes later; this page and the one-command runner are the stop-gap.</footer>
+</main>
+<script src="./setup.js"></script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Served by site/serve-local.mjs on the user's computer (accelerate.sh). The seed lives only in this tab's memory,
+     and this policy keeps it there: the page may connect to its own server (which forwards JSON-RPC to SUBFROST),
+     mempool.space and ordinals.com, and nowhere else; no inline or outside scripts. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' https://mempool.space https://ordinals.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Accelerate</title>
+<meta name="description" content="Proof of concept: alkanes-safe acceleration (RBF) signed by a keystore held in this tab's memory.">
+<style>
+  :root { --bg:#0b1220; --card:#111a2e; --raise:#16213a; --text:#e8edf7; --muted:rgba(232,237,247,.62); --faint:rgba(232,237,247,.38); --line:rgba(232,237,247,.08); --edge:rgba(255,255,255,.07); --ok:#4ade80; --danger:#f87171; --warn:#fbbf24; --accent:#7aa2ff; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  main { max-width:760px; margin:0 auto; padding:32px 16px 64px; }
+  h1 { font-size:26px; margin:0 0 6px; } h2 { font-size:15px; margin:0 0 12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+  p { margin:0 0 10px; } .lead { color:var(--muted); margin-bottom:14px; }
+  .card { background:var(--card); border-radius:16px; padding:20px; margin:16px 0; box-shadow:inset 0 1px 0 var(--edge),0 8px 24px rgba(0,0,0,.25); }
+  .poc { background:#3a2a06; color:var(--warn); border-radius:12px; padding:12px 14px; margin:12px 0; }
+  .ok{color:var(--ok)} .danger{color:var(--danger)} .warn{color:var(--warn)} .muted{color:var(--muted)} .small{font-size:13px}
+  .btn { font:inherit; border:0; border-radius:12px; padding:10px 16px; cursor:pointer; color:var(--text); background:var(--raise); }
+  .btn.primary { background:var(--accent); color:#0b1220; font-weight:700; } .btn.ghost { background:transparent; color:var(--accent); padding:6px 8px; }
+  .btn:disabled { opacity:.45; cursor:not-allowed; }
+  .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0; }
+  textarea, input { width:100%; font:13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace; color:var(--text); background:var(--raise); border:0; border-radius:12px; padding:12px; }
+  textarea { height:84px; resize:vertical; } input.short { width:90px; }
+  label { display:block; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:12px 0 6px; }
+  label.tick { text-transform:none; letter-spacing:0; font-size:13px; color:var(--text); display:flex; gap:8px; align-items:flex-start; }
+  label.tick input { width:auto; margin-top:3px; }
+  code { font:12px ui-monospace,SFMono-Regular,Menlo,monospace; word-break:break-all; }
+  .kv { display:flex; gap:12px; padding:6px 0; border-bottom:1px solid var(--line); font-size:13px; } .kv span { width:120px; flex-shrink:0; color:var(--muted); }
+  table.outs { width:100%; border-collapse:collapse; margin:10px 0; font-size:13px; } table.outs th { text-align:left; font-weight:400; color:var(--faint); padding:6px 4px; } table.outs td { padding:7px 4px; border-top:1px solid var(--line); }
+  .planbox, .refused { background:var(--raise); border-radius:12px; padding:14px; margin-top:12px; }
+  footer { color:var(--faint); font-size:12px; margin-top:28px; }
+  @media (max-width:520px) { .kv { flex-direction:column; gap:2px; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Accelerate (POC)</h1>
+  <p class="lead">Speed up a stuck alkanes transaction without touching its alkanes, runes or inscriptions: the same engine and checks as the SUBFROST app, signed by a keystore held in this tab only.</p>
+  <p class="poc"><b>Proof of concept, running on your computer.</b> Use a small test wallet. Your recovery phrase stays in this tab's memory: it is never stored or sent, not even to the small server in your Terminal, and it is gone when you reload or close the tab. Never use your wallet's own "Speed up" on an alkanes transaction.</p>
+
+  <section class="card">
+    <h2>1 · Keystore</h2>
+    <div id="locked">
+      <label for="seed">Recovery phrase (12 or 24 words)</label>
+      <textarea id="seed" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+      <label for="acct-index">Account index</label>
+      <input id="acct-index" class="short" inputmode="numeric" value="0">
+      <div class="row"><button class="btn primary" id="unlock">Unlock (this tab only)</button></div>
+      <p class="danger small" id="seed-error"></p>
+    </div>
+    <div id="unlocked" hidden>
+      <p class="ok small">Unlocked in this tab. Check the address below is your wallet's.</p>
+      <div id="addresses"></div>
+      <div class="row"><button class="btn secondary" id="forget">Forget the phrase</button></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2 · The transaction</h2>
+    <label for="tx-input">Transaction id (or raw transaction hex)</label>
+    <textarea id="tx-input" spellcheck="false"></textarea>
+    <div class="row"><button class="btn primary" id="check">Check</button></div>
+    <div id="facts"></div>
+  </section>
+
+  <section class="card">
+    <h2>3 · New fee rate and the plan</h2>
+    <div class="row" id="presets"></div>
+    <label for="rate">Fee rate (sat/vB)</label>
+    <input id="rate" inputmode="decimal" placeholder="e.g. 3">
+    <div id="plan"></div>
+    <div id="result"></div>
+  </section>
+
+  <section class="card">
+    <h2>What it does, and does not</h2>
+    <p class="small">It clones your transaction and lowers only your own change to pay the higher fee: every input, every output, their order and the OP_RETURN stay byte for byte, so alkanes and runes route exactly as before. Before anything is signed it checks the sat flow and alkane conservation, and simulates the original and the replacement to confirm every output settles identically; after signing it verifies the signed bytes, asks the node (testmempoolaccept) and looks once more for anything new spending the original, and only then broadcasts. "Check" stops before broadcasting.</p>
+    <p class="small muted">Not in this POC: adding a fee coin (shrink-change only), and the app's local records of in-flight packages and peg-outs. Rare sats and Atomicals are not indexed anywhere SUBFROST reads.</p>
+  </section>
+
+  <footer>Built from subfrost-app <code>{{APP_COMMIT}}</code> · engine <code>{{CORE_COMMIT}}</code> · wasm sha256 <code>{{WASM_SHA}}</code> · {{BUILT_AT}} · <a href="https://0xcasuwu.github.io/alkanes-safe-accelerate/" style="color:var(--accent)" rel="noreferrer">setup guide</a> · <a href="https://0xcasuwu.github.io/alkanes-safe-accelerate/check/" style="color:var(--accent)" rel="noreferrer">read-only checker</a><br>Served from your computer. To stop, press Ctrl+C in the Terminal window that started it.</footer>
+</main>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

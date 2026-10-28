@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accelerate Check</title>
+<meta name="description" content="Read-only check: can this alkanes transaction be sped up without touching its alkanes, and what exactly would change?">
+<style>
+  :root {
+    --bg: #0b1220; --card: #111a2e; --raise: #16213a; --text: #e8edf7; --muted: rgba(232,237,247,.62);
+    --faint: rgba(232,237,247,.38); --line: rgba(232,237,247,.08); --edge: rgba(255,255,255,.07);
+    --ok: #4ade80; --danger: #f87171; --warn: #fbbf24; --accent: #7aa2ff;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -.01em; }
+  h2 { font-size: 15px; margin: 0 0 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  h3 { font-size: 16px; margin: 22px 0 8px; }
+  p { margin: 0 0 10px; }
+  .lead { color: var(--muted); margin-bottom: 18px; }
+  .card { background: var(--card); border-radius: 16px; padding: 20px; margin: 16px 0; box-shadow: inset 0 1px 0 var(--edge), 0 8px 24px rgba(0,0,0,.25); }
+  .warn { color: var(--warn); }
+  .ok { color: var(--ok); } .danger { color: var(--danger); } .muted { color: var(--muted); } .small { font-size: 13px; }
+  .badge { display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 999px; background: var(--raise); color: var(--muted); margin-bottom: 14px; }
+  .btn { font: inherit; border: 0; border-radius: 12px; padding: 10px 16px; cursor: pointer; color: var(--text); background: var(--raise); transition: background .6s cubic-bezier(0,0,0,1); }
+  .btn:hover { background: #1d2b4a; transition: none; }
+  .btn.primary { background: var(--accent); color: #0b1220; font-weight: 700; }
+  .btn.ghost { background: transparent; color: var(--accent); padding: 6px 8px; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+  textarea, input { width: 100%; font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text); background: var(--raise); border: 0; border-radius: 12px; padding: 12px; box-shadow: inset 0 1px 0 var(--edge); }
+  textarea { height: 84px; resize: vertical; }
+  textarea:focus-visible, input:focus-visible, .btn:focus-visible { outline: 2px solid transparent; box-shadow: 0 0 0 3px rgba(122,162,255,.35); }
+  label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 12px 0 6px; }
+  code { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; color: var(--text); }
+  .kv { display: flex; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .kv span { width: 110px; flex-shrink: 0; color: var(--muted); }
+  table.outs { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 13px; }
+  table.outs th { text-align: left; font-weight: 400; color: var(--faint); padding: 6px 4px; }
+  table.outs td { padding: 7px 4px; border-top: 1px solid var(--line); }
+  td.reach { color: var(--faint); font-size: 12px; }
+  .planbox, .refused { background: var(--raise); border-radius: 12px; padding: 14px; margin-top: 12px; }
+  details summary { cursor: pointer; color: var(--accent); margin-top: 10px; }
+  ul { padding-left: 20px; margin: 0 0 10px; } li { margin: 4px 0; }
+  footer { color: var(--faint); font-size: 12px; margin-top: 28px; }
+  @media (max-width: 520px) { .kv { flex-direction: column; gap: 2px; } .kv span { width: auto; } }
+</style>
+</head>
+<body>
+<main>
+  <span class="badge">Read-only · never asks for a signature · mainnet</span>
+  <h1>Accelerate Check</h1>
+  <p class="lead">Can this stuck alkanes transaction be sped up without touching its alkanes, runes or inscriptions, and what exactly would change? This page runs the same engine the SUBFROST app uses, on public chain data.</p>
+  <p class="warn"><b>Do not use your wallet's own "Speed up" or "Cancel" on an alkanes transaction.</b> Those buttons do not know protostones. Xverse's appends an output after the OP_RETURN, which renumbers every protostone target and can send your tokens somewhere nothing will ever spend.</p>
+
+  <section class="card">
+    <h2>1 · Whose transaction</h2>
+    <p class="muted small">Read the addresses and public keys of the wallet that sent it. Nothing is signed; the engine needs the keys only to prove which outputs are yours.</p>
+    <div class="row" id="wallet-buttons"></div>
+    <details>
+      <summary>Enter addresses by hand</summary>
+      <label for="m-tr-addr">Taproot address</label><input id="m-tr-addr" spellcheck="false" placeholder="bc1p…">
+      <label for="m-tr-key">Taproot public key (hex)</label><input id="m-tr-key" spellcheck="false">
+      <label for="m-sw-addr">Native segwit address</label><input id="m-sw-addr" spellcheck="false" placeholder="bc1q…">
+      <label for="m-sw-key">Native segwit public key (hex)</label><input id="m-sw-key" spellcheck="false">
+      <div class="row"><button class="btn secondary" id="manual-use">Use these</button></div>
+    </details>
+    <p class="danger small" id="wallet-error"></p>
+    <div id="accounts"></div>
+  </section>
+
+  <section class="card">
+    <h2>2 · The transaction</h2>
+    <label for="tx-input">Transaction id (or raw transaction hex)</label>
+    <textarea id="tx-input" spellcheck="false" placeholder="txid"></textarea>
+    <div class="row"><button class="btn primary" id="check">Check</button></div>
+    <div id="facts"></div>
+  </section>
+
+  <section class="card">
+    <h2>3 · New fee rate and the plan</h2>
+    <div class="row" id="presets"></div>
+    <label for="rate">Fee rate (sat/vB)</label>
+    <input id="rate" inputmode="decimal" placeholder="e.g. 12">
+    <div id="plan"></div>
+  </section>
+
+  <section class="card">
+    <h2>How it stays safe</h2>
+    <p>An alkanes transaction moves tokens by output <i>position</i>: the OP_RETURN's protostones name outputs by index, and every input's balance is routed through them. Change the number or order of outputs and the same protostones point somewhere else.</p>
+    <ul>
+      <li><b>Clone, never rebuild.</b> The replacement is the original byte for byte (version, lock time, every input, sequence and script, the OP_RETURN) except one value: your last output of real value goes down by the extra fee.</li>
+      <li><b>Or add one clean coin</b> when that change cannot pay: a coin proven free of alkanes, runes and inscriptions, with ≥ 3 confirmations. (The app does this; this read-only page cannot prove a coin alkane-free, so it stops.)</li>
+      <li><b>Refuse instead of guessing:</b> if anything spends one of its outputs, if it calls a contract that follows it by txid (frUSD and frFB peg-outs and redeems), if the sats moving into the fee might be inscribed, or if any fact is unreadable.</li>
+      <li><b>Never break what waits on the txid.</b> A replacement has a new transaction id. It is refused when the transaction carries another protocol's data (Counterparty, Omni, Babylon, RGB, Stamps), and when it has no runestone and pays a script address (the shape of an inscription or rune commit, a staking deposit, a Lightning channel) unless you state it is a plain payment. A coin is never added to a payment to someone's taproot address (a silent-payment recipient would lose track of it).</li>
+      <li><b>Settle exactly like the original.</b> In the app, the indexer runs both the original and the replacement; every output must end with the same alkanes, so a contract that reads the transaction itself cannot behave differently.</li>
+      <li><b>Verify the signed bytes.</b> In the app, the wallet's answer is checked to be the planned transaction plus signatures only, signed SIGHASH_ALL, paying the planned fee on its real size, before anything is broadcast.</li>
+    </ul>
+    <h3>What this page cannot do</h3>
+    <p class="muted">Sign, broadcast, add a fee coin, run the app's alkane-conservation gate or its original-versus-replacement simulation, or read its records of in-flight packages and peg-outs (those need SUBFROST's indexer and your app session). Rare sats and Atomicals are not indexed anywhere SUBFROST reads: the plan says which sats move into the fee. To act on a plan, run the accelerator on your computer (<a href="../" style="color:var(--accent)">setup guide</a>) or use Accelerate in the app.</p>
+  </section>
+
+  <section class="card">
+    <h2>Proof</h2>
+    <ul>
+      <li><b>Engine</b> (subfrost-wallet-common <code>accelerate</code>): 49 unit tests, including a red case per guard, a field-by-field attack on the verifier, a replay of Xverse's append, and a 400-case property test against the indexer's own routing model.</li>
+      <li><b>Mutation proof:</b> each of the 37 guards, disabled alone, turns a test red.</li>
+      <li><b>Mainnet differential</b> (read-only): replacements built this way, simulated by mainnet's indexer at the original's block, routed alkanes identically on 33 of 33 recent alkanes transactions; the Xverse-style replacement changed routing on 15 of 33 (one sent an LP position to an output nothing spends).</li>
+      <li><b>App:</b> end-to-end tests against the real engine with real signatures; every race between planning and signing refused before broadcast.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Built from subfrost-app <code>933d5b048701</code> · engine <code>a579b1ad3ae7</code> · wasm sha256 <code>8218e558d0cd593f</code> · 2026-10-28<br>
+    Data: mempool.space (transactions, fees) and ordinals.com when it answers (inscriptions); only txids and outpoints are looked up there. This page stores nothing and sends your addresses and keys to no one.<br>
+    To act on a plan, run the accelerator on your computer: <a href="../" style="color:var(--accent)">setup guide</a>.
+  </footer>
+</main>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
